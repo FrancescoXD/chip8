@@ -51,10 +51,16 @@ The **stack** is an array of 16 16-bit values, used to store the address that th
 ## Keyboard
 The keyboard layout is the following:
 ```
-1	2	3	C
-4	5	6	D
-7	8	9	E
-A	0	B	F
+Keypad              Keyboard
++-+-+-+-+           +-+-+-+-+
+|1|2|3|C|           |1|2|3|4|
++-+-+-+-+           +-+-+-+-+
+|4|5|6|D| mapped to |Q|W|E|R|
++-+-+-+-+ ========> +-+-+-+-+
+|7|8|9|E|           |A|S|D|F|
++-+-+-+-+           +-+-+-+-+
+|A|0|B|F|           |Z|X|C|V|
++-+-+-+-+           +-+-+-+-+
 ```
 
 ## Display
