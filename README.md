@@ -2,7 +2,7 @@
 A simple CHIP8 emulator (maybe well written)
 
 # Info
-This document should contains all the technical reference, PR for any fix. Reference can be found [here](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM).
+This document should contains all the technical reference, PR for any fix. Reference can be found [here](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM). Another well written reference [here](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/).
 
 ## What's Chip-8?
 Chip-8 is a simple programming language for old pcs. They had 4K of RAM and used 16-key hexadecimal keypad for input. The interpreter took only 512 bytes of memory.
