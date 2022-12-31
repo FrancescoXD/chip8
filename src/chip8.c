@@ -41,7 +41,7 @@ void chip8_load_fontset(Chip8_t *chip) {
 	};
 
 	for (size_t i = 0; i < FONTSET_SIZE; ++i) {
-		chip->memory[i] = fontset[i];
+		chip->memory[FONTSET_START_ADDRESS + i] = fontset[i];
 	}
 }
 
@@ -83,8 +83,8 @@ void chip8_fetch_opcode(Chip8_t *chip) {
 }
 
 void chip8_execute(Chip8_t *chip) {
-	//fprintf(stdout, "pc: 0x%04X\n", chip->pc);
 	chip8_fetch_opcode(chip);
+	//fprintf(stdout, "pc: 0x%04X\n", chip->pc);
 	//fprintf(stdout, "opcode: 0x%04X\n", chip->opcode);
 	chip->pc += 0x2;
 
@@ -96,10 +96,30 @@ void chip8_execute(Chip8_t *chip) {
 			}
 			break;
 		case 0x1000: chip8_1nnn(chip); break;
+		case 0x2000: chip8_2nnn(chip); break;
+		case 0x3000: chip8_3xnn(chip); break;
+		case 0x4000: chip8_4xnn(chip); break;
+		case 0x5000: chip8_5xy0(chip); break;
 		case 0x6000: chip8_6xnn(chip); break;
 		case 0x7000: chip8_7xnn(chip); break;
+		case 0x8000:
+			switch (chip->opcode & 0x000Fu) {
+				case 0x0000: chip8_8xy0(chip); break;
+				case 0x0001: chip8_8xy1(chip); break;
+				case 0x0002: chip8_8xy2(chip); break;
+				case 0x0003: chip8_8xy3(chip); break;
+				case 0x0004: chip8_8xy4(chip); break;
+				case 0x0005: chip8_8xy5(chip); break;
+				case 0x0006: chip8_8xy6(chip); break;
+				case 0x0007: chip8_8xy7(chip); break;
+			}
+			break;
+		case 0x9000: chip8_9xy0(chip); break;
 		case 0xA000: chip8_annn(chip); break;
+		case 0xB000: chip8_bxnn(chip); break;
+		case 0xC000: chip8_cxnn(chip); break;
 		case 0xD000: chip8_dxyn(chip); break;
+		case 0xF000: chip8_fx29(chip); break;
 		default:
 			fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
 			break;
@@ -392,6 +412,10 @@ void chip8_dxyn(Chip8_t *chip) {
 /**
  * FX29: Font character
 */
+void chip8_fx29(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	chip->index = FONTSET_START_ADDRESS + ((FONTSET_SIZE / 5) % chip->registers[Vx]);
+}
 
 /**
  * FX33: Binary-coded decimal conversion

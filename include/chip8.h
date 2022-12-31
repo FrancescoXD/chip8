@@ -57,7 +57,6 @@ void chip8_load_fontset(Chip8_t *chip);
 void chip8_fetch_opcode(Chip8_t *chip);
 void chip8_execute(Chip8_t *chip);
 
-void chip8_dxyn(Chip8_t *chip);
 void chip8_00e0(Chip8_t *chip);
 void chip8_00ee(Chip8_t *chip);
 void chip8_1nnn(Chip8_t *chip);
@@ -65,7 +64,6 @@ void chip8_2nnn(Chip8_t *chip);
 void chip8_3xnn(Chip8_t *chip);
 void chip8_4xnn(Chip8_t *chip);
 void chip8_5xy0(Chip8_t *chip);
-void chip8_9xy0(Chip8_t *chip);
 void chip8_6xnn(Chip8_t *chip);
 void chip8_7xnn(Chip8_t *chip);
 void chip8_8xy0(Chip8_t *chip);
@@ -77,9 +75,11 @@ void chip8_8xy5(Chip8_t *chip);
 void chip8_8xy7(Chip8_t *chip);
 void chip8_8xy6(Chip8_t *chip);
 void chip8_8xye(Chip8_t *chip);
+void chip8_9xy0(Chip8_t *chip);
 void chip8_annn(Chip8_t *chip);
 void chip8_bxnn(Chip8_t *chip);
 void chip8_cxnn(Chip8_t *chip);
 void chip8_dxyn(Chip8_t *chip);
+void chip8_fx29(Chip8_t *chip);
 
 #endif

@@ -6,7 +6,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	fprintf(stdout, "Starting chip8 emulator...\n");
+	fprintf(stdout, "Starting Chip-8 emulator...\n");
 
 	Chip8_t chip = chip8_init();
 	const char *filename = argv[1];
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	fprintf(stdout, "ROM %s loaded!\n", filename);
-	//chip8_print_promem(&chip);
+	//chip8_print_resmem(&chip);
 
 	initscr();
 	resize_term(VIDEO_HEIGHT, VIDEO_WIDTH);
