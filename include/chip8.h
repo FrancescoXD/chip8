@@ -24,29 +24,29 @@
 #define FONTSET_START_ADDRESS 0x50
 
 typedef struct {
-    // Chip-8 uses up to 4KB of RAM
-    uint8_t memory[MEM_SIZE];
-    // Program Counter (PC) is a special 16-bit register
-    // It starts from 0x200
-    // An OPCODE is made by 2 bytes, so we need pc and pc+1
-    uint16_t pc;
-    // Stack Pointer (SP) points to the top of the stack
-    uint8_t sp;
-    // Index register used to store address in operations
-    uint16_t index;
-    // Stack is used to store the return address when a subroutines finishes
-    uint16_t stack[STACK_SIZE];
-    // 16 (8-bit) general purpose registers from V0 to VF
-    // VF is used as a flag to hold info about the result of the operations
-    uint8_t registers[REGISTERS_COUNT];
-    // 2 special registers
-    uint8_t delay_timer;
-    uint8_t sound_timer;
-    // The Keyboard (Keypad) layout
-    uint8_t keypad[KEYPAD_COUNT];
-    uint8_t video[VIDEO_WIDTH * VIDEO_HEIGHT];
-    // The read OPCODE
-    uint16_t opcode;
+	// Chip-8 uses up to 4KB of RAM
+	uint8_t memory[MEM_SIZE];
+	// Program Counter (PC) is a special 16-bit register
+	// It starts from 0x200
+	// An OPCODE is made by 2 bytes, so we need pc and pc+1
+	uint16_t pc;
+	// Stack Pointer (SP) points to the top of the stack
+	uint8_t sp;
+	// Index register used to store address in operations
+	uint16_t index;
+	// Stack is used to store the return address when a subroutines finishes
+	uint16_t stack[STACK_SIZE];
+	// 16 (8-bit) general purpose registers from V0 to VF
+	// VF is used as a flag to hold info about the result of the operations
+	uint8_t registers[REGISTERS_COUNT];
+	// 2 special registers
+	uint8_t delay_timer;
+	uint8_t sound_timer;
+	// The Keyboard (Keypad) layout
+	uint8_t keypad[KEYPAD_COUNT];
+	uint8_t video[VIDEO_WIDTH * VIDEO_HEIGHT];
+	// The read OPCODE
+	uint16_t opcode;
 } Chip8_t;
 
 Chip8_t chip8_init();
