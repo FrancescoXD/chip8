@@ -1,6 +1,11 @@
 #include <chip8.h>
 
 int main(int argc, char **argv) {
+	if (argc < 2) {
+		fprintf(stderr, "Usage:\n%s <ROM>\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+
 	fprintf(stdout, "Starting chip8 emulator...\n");
 
 	Chip8_t chip = chip8_init();
@@ -14,17 +19,21 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	fprintf(stdout, "ROM %s loaded!\n", filename);
-	chip8_print_promem(&chip);
+	//chip8_print_promem(&chip);
 
-	//initscr();
-	int i = 0;
-	while (i < 3) {
+	initscr();
+	resize_term(VIDEO_HEIGHT, VIDEO_WIDTH);
+	
+	mvprintw(0, 0, "CHIP-8 Emulator");
+	mvprintw(1, 0, "Loading %s...", filename);
+
+	while (1) {
 		chip8_execute(&chip);
-		i++;
-		//refresh();
-		//getch();
+		refresh();
 	}
-	//endwin();
+	
+	//getch();
+	endwin();
 
 	exit(EXIT_SUCCESS);
 }

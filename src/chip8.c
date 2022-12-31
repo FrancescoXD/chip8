@@ -79,30 +79,30 @@ void chip8_print_promem(Chip8_t *chip) {
 void chip8_fetch_opcode(Chip8_t *chip) {
 	chip->opcode = chip->memory[chip->pc];
 	chip->opcode <<= 8u;
-	fprintf(stdout, "opcode pc: %04X\n", chip->opcode);
 	chip->opcode |= chip->memory[chip->pc + 1];
-	fprintf(stdout, "opcode pc + pc+1: %04X\n", chip->opcode);
 }
 
 void chip8_execute(Chip8_t *chip) {
-	fprintf(stdout, "pc: %04X\n", chip->pc);
+	//fprintf(stdout, "pc: 0x%04X\n", chip->pc);
 	chip8_fetch_opcode(chip);
+	//fprintf(stdout, "opcode: 0x%04X\n", chip->opcode);
 	chip->pc += 0x2;
 
 	switch (chip->opcode & 0xF000u) {
 		case 0x0000:
 			switch (chip->opcode & 0x00FFu) {
-				case 0x00E0: chip8_00e0(chip); puts("CALLED cls 00e0"); break;
-				case 0x00EE: chip8_00ee(chip); puts("CALLED ret 00ee"); break;
+				case 0x00E0: chip8_00e0(chip); break;
+				case 0x00EE: chip8_00ee(chip); break;
 			}
 			break;
-		case 0x1000: chip8_1nnn(chip); puts("CALLED 1nnn"); break;
-		case 0x6000: chip8_6xnn(chip); puts("CALLED 6xnn"); break;
-		case 0x7000: chip8_7xnn(chip); puts("CALLED 7xnn"); break;
-		case 0xA000: chip8_annn(chip); puts("CALLED annn"); break;
-		case 0xD000: chip8_dxyn(chip); puts("CALLED dxyn"); break;
+		case 0x1000: chip8_1nnn(chip); break;
+		case 0x6000: chip8_6xnn(chip); break;
+		case 0x7000: chip8_7xnn(chip); break;
+		case 0xA000: chip8_annn(chip); break;
+		case 0xD000: chip8_dxyn(chip); break;
 		default:
 			fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
+			break;
 	}
 }
 
@@ -343,32 +343,33 @@ void chip8_cxnn(Chip8_t *chip) {
  * DXYN: Display
 */
 void chip8_dxyn(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
-	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4;
-	uint8_t x = chip->registers[Vx] % VIDEO_WIDTH;
-	uint8_t y = chip->registers[Vy] % VIDEO_HEIGHT;
-	//fprintf(stdout, "DEBUG\nx: %d\ny: %d\n", x, y);
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
+	uint8_t x = chip->registers[Vx] & VIDEO_WIDTH - 1;
+	uint8_t y = chip->registers[Vy] & VIDEO_HEIGHT - 1;
 	chip->registers[0xF] = 0x0;
 
 	uint8_t rows = chip->opcode & 0x000Fu;
 
 	for (size_t row = 0; row < rows; ++row) {
+		/*mvprintw(0, 0, "refresh %d", row);
+		mvprintw(1, 0, "x: %d y: %d", x, y);
+		getch();*/
+
 		uint8_t sprite_data = chip->memory[chip->index + row];
 		for (size_t col = 0; col < 8; ++col) {
 			uint8_t pixel = sprite_data >> 7;
 			sprite_data <<= 1;
-			size_t pos = x * (VIDEO_WIDTH * VIDEO_HEIGHT) + y;
-			if (sprite_data && chip->video[pos]) {
+			size_t pos = (y + row) * VIDEO_WIDTH + (x + col);
+			if (pixel && chip->video[pos]) {
 				chip->video[pos] = 0x0;
 				chip->registers[0xF] = 0x1;
-				mvprintw(x, y, "X");
-			} else if (sprite_data && !chip->video[pos]) {
+				mvprintw(y + row, x + col, "");
+			} else if (pixel && !chip->video[pos]) {
 				chip->video[pos] = 0x1;
-				mvprintw(x, y, "");
+				mvprintw(y + row, x + col, "O");
 			}
-			x++;
 		}
-		y++;
 	}
 }
 
