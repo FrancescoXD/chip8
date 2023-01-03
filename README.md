@@ -1,6 +1,13 @@
 # chip8
 A simple CHIP8 emulator (maybe well written)
 
+# How to compile
+```
+$ chmod +x compile.sh
+$ ./compile.sh
+```
+And then run `./chip8_em` :)
+
 # Info
 This document should contains all the technical reference, PR for any fix. Reference can be found [here](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM). Another well written reference [here](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/).
 

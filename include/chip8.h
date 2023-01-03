@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include <ncurses.h>
 #include <SDL2/SDL.h>
 
 #define STACK_SIZE 16
@@ -45,7 +44,7 @@ typedef struct {
 	uint8_t sound_timer;
 	// The Keyboard (Keypad) layout
 	uint8_t keypad[KEYPAD_COUNT];
-	uint8_t video[VIDEO_WIDTH * VIDEO_HEIGHT];
+	uint32_t video[VIDEO_WIDTH * VIDEO_HEIGHT];
 	// The read OPCODE
 	uint16_t opcode;
 } Chip8_t;
@@ -57,7 +56,6 @@ void chip8_print_promem(Chip8_t *chip);
 void chip8_load_fontset(Chip8_t *chip);
 void chip8_fetch_opcode(Chip8_t *chip);
 void chip8_execute(Chip8_t *chip);
-void chip8_get_pressed_key(Chip8_t *chip, int key);
 
 void chip8_00e0(Chip8_t *chip);
 void chip8_00ee(Chip8_t *chip);

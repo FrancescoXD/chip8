@@ -162,40 +162,6 @@ void chip8_execute(Chip8_t *chip) {
 }
 
 /**
- * Keypad              Keyboard
-+-+-+-+-+           +-+-+-+-+
-|1|2|3|C|           |1|2|3|4|
-+-+-+-+-+           +-+-+-+-+
-|4|5|6|D| mapped to |Q|W|E|R|
-+-+-+-+-+ ========> +-+-+-+-+
-|7|8|9|E|           |A|S|D|F|
-+-+-+-+-+           +-+-+-+-+
-|A|0|B|F|           |Z|X|C|V|
-+-+-+-+-+           +-+-+-+-+
-*/
-
-void chip8_get_pressed_key(Chip8_t *chip, int key) {
-	switch (key) {
-		case 49: chip->keypad[0x0] = 1; break; // 1
-		case 50: chip->keypad[0x1] = 1; break; // 2
-		case 51: chip->keypad[0x3] = 1; break; // 3
-		case 52: chip->keypad[0xC] = 1; break; // 4
-		case 113: chip->keypad[0x4] = 1; break; // Q
-		case 119: chip->keypad[0x5] = 1; break; // W
-		case 101: chip->keypad[0x6] = 1; break; // E
-		case 114: chip->keypad[0xD] = 1; break; // R
-		case 97: chip->keypad[0x7] = 1; break; // A
-		case 115: chip->keypad[0x8] = 1; break; // S
-		case 100: chip->keypad[0x9] = 1; break; // D
-		case 102: chip->keypad[0xE] = 1; break; // F
-		case 122: chip->keypad[0xA] = 1; break; // Z
-		case 120: chip->keypad[0x0] = 1; break; // X
-		case 99: chip->keypad[0xB] = 1; break; // C
-		case 118: chip->keypad[0xF] = 1; break; // V
-	}
-}
-
-/**
  * OPCODE OPERATIONS HERE
 */
 
@@ -419,8 +385,8 @@ void chip8_cxnn(Chip8_t *chip) {
 void chip8_dxyn(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	uint8_t x = chip->registers[Vx] & VIDEO_WIDTH - 1;
-	uint8_t y = chip->registers[Vy] & VIDEO_HEIGHT - 1;
+	uint8_t x = chip->registers[Vx] & (VIDEO_WIDTH - 1);
+	uint8_t y = chip->registers[Vy] & (VIDEO_HEIGHT - 1);
 	chip->registers[0xF] = 0x0;
 
 	uint8_t rows = chip->opcode & 0x000Fu;
@@ -431,13 +397,13 @@ void chip8_dxyn(Chip8_t *chip) {
 			uint8_t pixel = sprite_data >> 7;
 			sprite_data <<= 1;
 			size_t pos = (y + row) * VIDEO_WIDTH + (x + col);
-			if (pixel && chip->video[pos]) {
+			if (pixel && (chip->video[pos] == 0xFFFFFFFF)) {
+				//UNDRAW POINT
 				chip->video[pos] = 0x0;
 				chip->registers[0xF] = 0x1;
-				mvprintw(y + row, x + col, " ");
 			} else if (pixel && !chip->video[pos]) {
-				chip->video[pos] = 0x1;
-				mvprintw(y + row, x + col, "O");
+				//DRAW POINT
+				chip->video[pos] = 0xFFFFFFFF;
 			}
 		}
 	}
@@ -447,7 +413,7 @@ void chip8_dxyn(Chip8_t *chip) {
  * EX9E and EXA1: Skip if key
 */
 void chip8_ex9e(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t key = chip->registers[Vx];
 	if (chip->keypad[key]) {
 		chip->pc += 2;
@@ -455,7 +421,7 @@ void chip8_ex9e(Chip8_t *chip) {
 }
 
 void chip8_exa1(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t key = chip->registers[Vx];
 	if (!chip->keypad[key]) {
 		chip->pc += 2;
@@ -469,17 +435,17 @@ void chip8_exa1(Chip8_t *chip) {
  * Timer and Sound needs to be decremented...
 */
 void chip8_fx07(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	chip->registers[Vx] = chip->delay_timer;
 }
 
 void chip8_fx15(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	chip->delay_timer = chip->registers[Vx];
 }
 
 void chip8_fx18(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	chip->sound_timer = chip->registers[Vx];
 }
 
@@ -487,7 +453,7 @@ void chip8_fx18(Chip8_t *chip) {
  * FX1E: Add to index
 */
 void chip8_fx1e(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint32_t result = chip->index + chip->registers[Vx];
 	if (result > 0xFFFF) {
 		chip->registers[0xF] = 0x1;
@@ -503,7 +469,7 @@ void chip8_fx1e(Chip8_t *chip) {
  * FX29: Font character
 */
 void chip8_fx29(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t digit = chip->registers[Vx];
 	chip->index = FONTSET_START_ADDRESS + (5 * digit);
 }
@@ -527,14 +493,14 @@ void chip8_fx33(Chip8_t *chip) {
  * Ambiguous instruction!
 */
 void chip8_fx55(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	for (size_t i = 0; i <= Vx; ++i) {
 		chip->memory[chip->index + i] = chip->registers[i];
 	}
 }
 
 void chip8_fx65(Chip8_t *chip) {
-	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	for (size_t i = 0; i <= Vx; ++i) {
 		chip->registers[i] = chip->memory[chip->index + i];
 	}
