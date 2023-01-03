@@ -53,7 +53,7 @@ bool chip8_load_rom(Chip8_t *chip, const char *filename) {
 	if (fd < 0) return false;
 	ssize_t romsize = read(fd, &chip->memory[START_ADDRESS], MEM_SIZE - START_ADDRESS);
 	if (romsize < 0) return false;
-	fprintf(stdout, "Rom size: %lu\n", romsize);
+	fprintf(stdout, "Rom size: %luB\n", romsize);
 	return true;
 }
 
@@ -112,6 +112,10 @@ void chip8_execute(Chip8_t *chip) {
 				case 0x0005: chip8_8xy5(chip); break;
 				case 0x0006: chip8_8xy6(chip); break;
 				case 0x0007: chip8_8xy7(chip); break;
+				case 0x000E: chip8_8xye(chip); break;
+				default:
+					fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
+					break;
 			}
 			break;
 		case 0x9000: chip8_9xy0(chip); break;
@@ -119,28 +123,80 @@ void chip8_execute(Chip8_t *chip) {
 		case 0xB000: chip8_bxnn(chip); break;
 		case 0xC000: chip8_cxnn(chip); break;
 		case 0xD000: chip8_dxyn(chip); break;
-		case 0xF000: chip8_fx29(chip); break;
+		case 0xE000:
+			switch (chip->opcode & 0x00FFu) {
+				case 0x00A1: chip8_exa1(chip); break;
+				case 0x009E: chip8_ex9e(chip); break;
+				default:
+					fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
+					break;
+			}
+			break;
+		case 0xF000:
+			switch (chip->opcode & 0x00FFu) {
+				case 0x0007: chip8_fx07(chip); break;
+				case 0x0015: chip8_fx15(chip); break;
+				case 0x0018: chip8_fx18(chip); break;
+				case 0x0029: chip8_fx29(chip); break;
+				case 0x001E: chip8_fx1e(chip); break;
+				case 0x0033: chip8_fx33(chip); break;
+				case 0x0055: chip8_fx55(chip); break;
+				case 0x0065: chip8_fx65(chip); break;
+				default:
+					fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
+					break;
+			}
+			break;
 		default:
 			fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
 			break;
+	}
+	if (chip->delay_timer > 0) {
+		chip->delay_timer--;
+	}
+
+	if (chip->sound_timer > 0) {
+		// BEEP
+		chip->sound_timer--;
+	}
+}
+
+/**
+ * Keypad              Keyboard
++-+-+-+-+           +-+-+-+-+
+|1|2|3|C|           |1|2|3|4|
++-+-+-+-+           +-+-+-+-+
+|4|5|6|D| mapped to |Q|W|E|R|
++-+-+-+-+ ========> +-+-+-+-+
+|7|8|9|E|           |A|S|D|F|
++-+-+-+-+           +-+-+-+-+
+|A|0|B|F|           |Z|X|C|V|
++-+-+-+-+           +-+-+-+-+
+*/
+
+void chip8_get_pressed_key(Chip8_t *chip, int key) {
+	switch (key) {
+		case 49: chip->keypad[0x0] = 1; break; // 1
+		case 50: chip->keypad[0x1] = 1; break; // 2
+		case 51: chip->keypad[0x3] = 1; break; // 3
+		case 52: chip->keypad[0xC] = 1; break; // 4
+		case 113: chip->keypad[0x4] = 1; break; // Q
+		case 119: chip->keypad[0x5] = 1; break; // W
+		case 101: chip->keypad[0x6] = 1; break; // E
+		case 114: chip->keypad[0xD] = 1; break; // R
+		case 97: chip->keypad[0x7] = 1; break; // A
+		case 115: chip->keypad[0x8] = 1; break; // S
+		case 100: chip->keypad[0x9] = 1; break; // D
+		case 102: chip->keypad[0xE] = 1; break; // F
+		case 122: chip->keypad[0xA] = 1; break; // Z
+		case 120: chip->keypad[0x0] = 1; break; // X
+		case 99: chip->keypad[0xB] = 1; break; // C
+		case 118: chip->keypad[0xF] = 1; break; // V
 	}
 }
 
 /**
  * OPCODE OPERATIONS HERE
- * EXAMPLE:
- * 8xy0
- * Vx = (opcode & 0x0F00u) >> 8;
- * 8AB0
- * A = 1010
- * B = 1011
- * OPCODE:
- * 1000 1010 1011 0000
- * VX:
- * 0000 1111 0000 0000
- * RES:
- * 0000 0000 0000 1010
- * The same is for Vy but it shifts only 4 digits
 */
 
 /**
@@ -287,8 +343,6 @@ void chip8_8xy4(Chip8_t *chip) {
 
 /**
  * 8XY5 and 8XY7: Subtract
- * 8XY5 sets VX to the result of VX - VY
- * 8XY7 sets VX to the result of VY - VX
 */
 void chip8_8xy5(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
@@ -372,10 +426,6 @@ void chip8_dxyn(Chip8_t *chip) {
 	uint8_t rows = chip->opcode & 0x000Fu;
 
 	for (size_t row = 0; row < rows; ++row) {
-		/*mvprintw(0, 0, "refresh %d", row);
-		mvprintw(1, 0, "x: %d y: %d", x, y);
-		getch();*/
-
 		uint8_t sprite_data = chip->memory[chip->index + row];
 		for (size_t col = 0; col < 8; ++col) {
 			uint8_t pixel = sprite_data >> 7;
@@ -384,7 +434,7 @@ void chip8_dxyn(Chip8_t *chip) {
 			if (pixel && chip->video[pos]) {
 				chip->video[pos] = 0x0;
 				chip->registers[0xF] = 0x1;
-				mvprintw(y + row, x + col, "");
+				mvprintw(y + row, x + col, " ");
 			} else if (pixel && !chip->video[pos]) {
 				chip->video[pos] = 0x1;
 				mvprintw(y + row, x + col, "O");
@@ -396,14 +446,54 @@ void chip8_dxyn(Chip8_t *chip) {
 /**
  * EX9E and EXA1: Skip if key
 */
+void chip8_ex9e(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t key = chip->registers[Vx];
+	if (chip->keypad[key]) {
+		chip->pc += 2;
+	}
+}
+
+void chip8_exa1(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint8_t key = chip->registers[Vx];
+	if (!chip->keypad[key]) {
+		chip->pc += 2;
+	}
+}
 
 /**
  * FX07, FX15 and FX18: Timers
+ * 
+ * TODO:
+ * Timer and Sound needs to be decremented...
 */
+void chip8_fx07(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	chip->registers[Vx] = chip->delay_timer;
+}
+
+void chip8_fx15(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	chip->delay_timer = chip->registers[Vx];
+}
+
+void chip8_fx18(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	chip->sound_timer = chip->registers[Vx];
+}
 
 /**
  * FX1E: Add to index
 */
+void chip8_fx1e(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	uint32_t result = chip->index + chip->registers[Vx];
+	if (result > 0xFFFF) {
+		chip->registers[0xF] = 0x1;
+	}
+	chip->index += chip->registers[Vx];
+}
 
 /**
  * FX0A: Get key
@@ -414,13 +504,38 @@ void chip8_dxyn(Chip8_t *chip) {
 */
 void chip8_fx29(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
-	chip->index = FONTSET_START_ADDRESS + ((FONTSET_SIZE / 5) % chip->registers[Vx]);
+	uint8_t digit = chip->registers[Vx];
+	chip->index = FONTSET_START_ADDRESS + (5 * digit);
 }
 
 /**
  * FX33: Binary-coded decimal conversion
 */
+void chip8_fx33(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
+	uint8_t value = chip->registers[Vx];
+
+	chip->memory[chip->index + 2] = value % 10;
+	value /= 10;
+	chip->memory[chip->index + 1] = value % 10;
+	value /= 10;
+	chip->memory[chip->index] = value % 10;
+}
 
 /**
  * FX55 and FX65: Store and load memory
+ * Ambiguous instruction!
 */
+void chip8_fx55(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	for (size_t i = 0; i <= Vx; ++i) {
+		chip->memory[chip->index + i] = chip->registers[i];
+	}
+}
+
+void chip8_fx65(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	for (size_t i = 0; i <= Vx; ++i) {
+		chip->registers[i] = chip->memory[chip->index + i];
+	}
+}

@@ -73,4 +73,4 @@ Chip-8 draws graphics on screen through the use of **sprites**. A sprite is a gr
 
 ## Timers and Sound
 The **delay timer** is active whenever the delay timer register (*DT*) is non-zero. This timer does nothing more than subtract 1 from the value of DT at a rate of 60Hz. When DT reaches 0, it deactivates.  
-The **sound timer** is active whenever the sound timer register (*STé) is non-zero. This timer also decrements at a rate of 60Hz, however, as long as ST's value is greater than zero, the Chip-8 buzzer will sound. The sound is decided by the author.
+The **sound timer** is active whenever the sound timer register (*ST*) is non-zero. This timer also decrements at a rate of 60Hz, however, as long as ST's value is greater than zero, the Chip-8 buzzer will sound. The sound is decided by the author.

@@ -11,6 +11,7 @@
 #include <time.h>
 
 #include <ncurses.h>
+#include <SDL2/SDL.h>
 
 #define STACK_SIZE 16
 #define REGISTERS_COUNT 16
@@ -56,6 +57,7 @@ void chip8_print_promem(Chip8_t *chip);
 void chip8_load_fontset(Chip8_t *chip);
 void chip8_fetch_opcode(Chip8_t *chip);
 void chip8_execute(Chip8_t *chip);
+void chip8_get_pressed_key(Chip8_t *chip, int key);
 
 void chip8_00e0(Chip8_t *chip);
 void chip8_00ee(Chip8_t *chip);
@@ -80,6 +82,15 @@ void chip8_annn(Chip8_t *chip);
 void chip8_bxnn(Chip8_t *chip);
 void chip8_cxnn(Chip8_t *chip);
 void chip8_dxyn(Chip8_t *chip);
+void chip8_ex9e(Chip8_t *chip);
+void chip8_exa1(Chip8_t *chip);
+void chip8_fx07(Chip8_t *chip);
+void chip8_fx15(Chip8_t *chip);
+void chip8_fx18(Chip8_t *chip);
 void chip8_fx29(Chip8_t *chip);
+void chip8_fx1e(Chip8_t *chip);
+void chip8_fx33(Chip8_t *chip);
+void chip8_fx55(Chip8_t *chip);
+void chip8_fx65(Chip8_t *chip);
 
 #endif

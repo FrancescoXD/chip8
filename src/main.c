@@ -2,7 +2,8 @@
 
 int main(int argc, char **argv) {
 	if (argc < 2) {
-		fprintf(stderr, "Usage:\n%s <ROM>\n", argv[0]);
+		fprintf(stderr, "Usage:\n%s <ROM>\n\n", argv[0]);
+		fprintf(stderr, "Example:\n%s roms/IBM_Logo.ch8\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -22,17 +23,22 @@ int main(int argc, char **argv) {
 	//chip8_print_resmem(&chip);
 
 	initscr();
+	cbreak();
+	noecho();
+	nodelay(stdscr, TRUE);
 	resize_term(VIDEO_HEIGHT, VIDEO_WIDTH);
 	
-	mvprintw(0, 0, "CHIP-8 Emulator");
-	mvprintw(1, 0, "Loading %s...", filename);
+	//mvprintw(0, 0, "CHIP-8 Emulator");
+	//mvprintw(1, 0, "Loading %s...", filename);
 
 	while (1) {
 		chip8_execute(&chip);
 		refresh();
+		usleep(2000);
+		//if (kbhit()) chip8_get_pressed_key(&chip, getch());
 	}
 	
-	//getch();
+	//while (getch() == -1) {};
 	endwin();
 
 	exit(EXIT_SUCCESS);
