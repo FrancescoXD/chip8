@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv) {
 	if (argc < 3) {
-		fprintf(stderr, "Usage:\n%s <SCALE> <ROM> [DEBUG]\n\n", argv[0]);
+		fprintf(stderr, "Usage:\n%s <SCALE> <ROM>\n\n", argv[0]);
 		fprintf(stderr, "Example:\n%s 10 roms/IBM_Logo.ch8\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 		quit = gui_handle_input(chip8.keypad);
 		chip8_execute(&chip8);
 		gui_update_screen(chip8.video, sizeof(chip8.video[0]) * VIDEO_WIDTH, &gui);
-		usleep(1000);
+		usleep(500);
 	}
 	fprintf(stdout, "Closing Chip-8 emulator...\n");
 

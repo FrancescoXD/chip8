@@ -8,6 +8,13 @@ $ ./compile.sh
 ```
 And then run `./chip8_em` :)
 
+You can close the emulator with ESC key.
+
+## Example Screenshot
+![](./.screenshots/IBM_Logo.png)
+
+IBM LOGO (you can try it launching `roms/IBM_logo.ch8`)
+
 # Info
 This document should contains all the technical reference, PR for any fix. Reference can be found [here](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM). Another well written reference [here](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/).
 
