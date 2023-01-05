@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
 	// Event loop
 	while (!quit) {
-		quit = chip8_gui_handle_input(chip8.keypad);
+		quit = chip8_gui_handle_input(&chip8.keypad);
 		chip8_execute(&chip8);
 		chip8_gui_update_screen(chip8.video, sizeof(chip8.video[0]) * VIDEO_WIDTH, &gui);
 		usleep(500);

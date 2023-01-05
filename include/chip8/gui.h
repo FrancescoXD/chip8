@@ -1,5 +1,5 @@
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __CHIP8GUI_H__
+#define __CHIP8GUI_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@ typedef struct {
 
 Gui_t chip8_gui_init(const char *title, int videowidth, int videoheight, int scalevideo);
 void chip8_gui_update_screen(void const *buffer, int pitch, Gui_t *gui);
-bool chip8_gui_handle_input(uint8_t *keypad);
+bool chip8_gui_handle_input(uint16_t *keypad);
 void chip8_gui_quit(Gui_t *gui);
 
 #endif

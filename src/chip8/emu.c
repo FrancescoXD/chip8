@@ -1,4 +1,4 @@
-#include <chip8.h>
+#include <chip8/emu.h>
 
 /**
  * Init the chip's structure
@@ -152,14 +152,9 @@ void chip8_execute(Chip8_t *chip) {
 			fprintf(stderr, "Invalid OPCODE: %X\n", chip->opcode);
 			break;
 	}
-	if (chip->delay_timer > 0) {
-		chip->delay_timer--;
-	}
+	if (chip->delay_timer > 0) chip->delay_timer--;
 
-	if (chip->sound_timer > 0) {
-		// BEEP
-		chip->sound_timer--;
-	}
+	if (chip->sound_timer > 0) chip->sound_timer--;
 }
 
 /**
@@ -271,7 +266,7 @@ void chip8_8xy0(Chip8_t *chip) {
 void chip8_8xy1(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	chip->registers[Vx] = chip->registers[Vx] | chip->registers[Vy];
+	chip->registers[Vx] |= chip->registers[Vy];
 }
 
 /**
@@ -280,7 +275,7 @@ void chip8_8xy1(Chip8_t *chip) {
 void chip8_8xy2(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	chip->registers[Vx] = chip->registers[Vx] & chip->registers[Vy];
+	chip->registers[Vx] &= chip->registers[Vy];
 }
 
 /**
@@ -289,7 +284,7 @@ void chip8_8xy2(Chip8_t *chip) {
 void chip8_8xy3(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	chip->registers[Vx] = chip->registers[Vx] ^ chip->registers[Vy];
+	chip->registers[Vx] ^= chip->registers[Vy];
 }
 
 /**
@@ -300,11 +295,8 @@ void chip8_8xy4(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
 	uint16_t carry = chip->registers[Vx] + chip->registers[Vy];
-	if (carry > 0xFF) {
-		chip->registers[0xF] = 0x1;
-	} else {
-		chip->registers[0xF] = 0x0;
-	}
+	if (carry > 0xFF) chip->registers[0xF] = 0x1;
+	else chip->registers[0xF] = 0x0;
 	chip->registers[Vx] = chip->registers[Vx] + chip->registers[Vy];
 }
 
@@ -314,23 +306,17 @@ void chip8_8xy4(Chip8_t *chip) {
 void chip8_8xy5(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	if (chip->registers[Vx] > chip->registers[Vy]) {
-		chip->registers[0xF] = 0x1;
-	} else {
-		chip->registers[0xF] = 0x0;
-	}
-	chip->registers[Vx] = chip->registers[Vx] - chip->registers[Vy];
+	if (chip->registers[Vx] > chip->registers[Vy]) chip->registers[0xF] = 0x1;
+	else chip->registers[0xF] = 0x0;
+	chip->registers[Vx] -= chip->registers[Vy];
 }
 
 void chip8_8xy7(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (chip->opcode & 0x00F0u) >> 4u;
-	if (chip->registers[Vy] > chip->registers[Vx]) {
-		chip->registers[0xF] = 0x1;
-	} else {
-		chip->registers[0xF] = 0x0;
-	}
-	chip->registers[Vy] = chip->registers[Vy] - chip->registers[Vx];
+	if (chip->registers[Vy] > chip->registers[Vx]) chip->registers[0xF] = 0x1;
+	else chip->registers[0xF] = 0x0;
+	chip->registers[Vy] -= chip->registers[Vx];
 }
 
 /**
@@ -415,18 +401,12 @@ void chip8_dxyn(Chip8_t *chip) {
 */
 void chip8_ex9e(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
-	uint8_t key = chip->registers[Vx];
-	if (chip->keypad[key]) {
-		chip->pc += 2;
-	}
+	if (chip->keypad & (1 << chip->registers[Vx])) chip->pc += 2;
 }
 
 void chip8_exa1(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
-	uint8_t key = chip->registers[Vx];
-	if (!chip->keypad[key]) {
-		chip->pc += 2;
-	}
+	if (!(chip->keypad & (1 << chip->registers[Vx]))) chip->pc += 2;
 }
 
 /**
@@ -456,9 +436,7 @@ void chip8_fx18(Chip8_t *chip) {
 void chip8_fx1e(Chip8_t *chip) {
 	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8u;
 	uint32_t result = chip->index + chip->registers[Vx];
-	if (result > 0xFFFF) {
-		chip->registers[0xF] = 0x1;
-	}
+	if (result > 0xFFFF) chip->registers[0xF] = 0x1;
 	chip->index += chip->registers[Vx];
 }
 
@@ -467,9 +445,7 @@ void chip8_fx1e(Chip8_t *chip) {
 */
 uint8_t _find_key(uint8_t registers[]) {
 	for (size_t i = 0; i <= 0xF; ++i) {
-		if (registers[i]) {
-			return i;
-		}
+		if (registers[i]) return i;
 	}
 	return -1;
 }
