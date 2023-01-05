@@ -5,7 +5,7 @@ void gui_send_error(const char *err) {
 	exit(EXIT_FAILURE);
 }
 
-Gui_t gui_init(const char *title, int videowidth, int videoheight, int scalevideo) {
+Gui_t chip8_gui_init(const char *title, int videowidth, int videoheight, int scalevideo) {
 	Gui_t gui;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -31,7 +31,7 @@ Gui_t gui_init(const char *title, int videowidth, int videoheight, int scalevide
 	return gui;
 }
 
-bool gui_handle_input(uint8_t *keypad) {
+bool chip8_gui_handle_input(uint8_t *keypad) {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event)) {
@@ -83,14 +83,14 @@ bool gui_handle_input(uint8_t *keypad) {
 	return false;
 }
 
-void gui_update_screen(void const *buffer, int pitch, Gui_t *gui) {
+void chip8_gui_update_screen(void const *buffer, int pitch, Gui_t *gui) {
 	SDL_UpdateTexture(gui->texture, NULL, buffer, pitch);
 	SDL_RenderClear(gui->renderer);
 	SDL_RenderCopy(gui->renderer, gui->texture, NULL, NULL);
 	SDL_RenderPresent(gui->renderer);
 }
 
-void gui_quit(Gui_t *gui) {
+void chip8_gui_quit(Gui_t *gui) {
 	SDL_DestroyRenderer(gui->renderer);
 	SDL_DestroyWindow(gui->window);
 	SDL_Quit();

@@ -1,5 +1,4 @@
 #include <chip8.h>
-#include <gui.h>
 
 int main(int argc, char **argv) {
 	if (argc < 3) {
@@ -25,19 +24,19 @@ int main(int argc, char **argv) {
 	fprintf(stdout, "ROM %s loaded!\n", filename);
 
 	// Init the GUI
-	Gui_t gui = gui_init("Chip-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, scale);
+	Gui_t gui = chip8_gui_init("Chip-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, scale);
 	bool quit = false;
 
 	// Event loop
 	while (!quit) {
-		quit = gui_handle_input(chip8.keypad);
+		quit = chip8_gui_handle_input(chip8.keypad);
 		chip8_execute(&chip8);
-		gui_update_screen(chip8.video, sizeof(chip8.video[0]) * VIDEO_WIDTH, &gui);
+		chip8_gui_update_screen(chip8.video, sizeof(chip8.video[0]) * VIDEO_WIDTH, &gui);
 		usleep(500);
 	}
 	fprintf(stdout, "Closing Chip-8 emulator...\n");
 
-	gui_quit(&gui);
+	chip8_gui_quit(&gui);
 
 	exit(EXIT_SUCCESS);
 }

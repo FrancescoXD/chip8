@@ -135,6 +135,7 @@ void chip8_execute(Chip8_t *chip) {
 		case 0xF000:
 			switch (chip->opcode & 0x00FFu) {
 				case 0x0007: chip8_fx07(chip); break;
+				case 0x000A: chip8_fx0a(chip); break;
 				case 0x0015: chip8_fx15(chip); break;
 				case 0x0018: chip8_fx18(chip); break;
 				case 0x0029: chip8_fx29(chip); break;
@@ -464,6 +465,21 @@ void chip8_fx1e(Chip8_t *chip) {
 /**
  * FX0A: Get key
 */
+uint8_t _find_key(uint8_t registers[]) {
+	for (size_t i = 0; i <= 0xF; ++i) {
+		if (registers[i]) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void chip8_fx0a(Chip8_t *chip) {
+	uint8_t Vx = (chip->opcode & 0x0F00u) >> 8;
+	int val = _find_key(chip->registers);
+	if (val == -1) chip->pc -= 2;
+	else chip->registers[Vx] = val;
+}
 
 /**
  * FX29: Font character

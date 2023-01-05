@@ -13,9 +13,9 @@ typedef struct {
     SDL_Texture *texture;
 } Gui_t;
 
-Gui_t gui_init(const char *title, int videowidth, int videoheight, int scalevideo);
-void gui_update_screen(void const *buffer, int pitch, Gui_t *gui);
-bool gui_handle_input(uint8_t *keypad);
-void gui_quit(Gui_t *gui);
+Gui_t chip8_gui_init(const char *title, int videowidth, int videoheight, int scalevideo);
+void chip8_gui_update_screen(void const *buffer, int pitch, Gui_t *gui);
+bool chip8_gui_handle_input(uint8_t *keypad);
+void chip8_gui_quit(Gui_t *gui);
 
 #endif

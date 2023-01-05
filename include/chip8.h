@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <time.h>
 
-#include <SDL2/SDL.h>
+#include <gui.h>
 
 #define STACK_SIZE 16
 #define REGISTERS_COUNT 16
@@ -83,6 +83,7 @@ void chip8_dxyn(Chip8_t *chip);
 void chip8_ex9e(Chip8_t *chip);
 void chip8_exa1(Chip8_t *chip);
 void chip8_fx07(Chip8_t *chip);
+void chip8_fx0a(Chip8_t *chip);
 void chip8_fx15(Chip8_t *chip);
 void chip8_fx18(Chip8_t *chip);
 void chip8_fx29(Chip8_t *chip);
